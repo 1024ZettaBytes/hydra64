@@ -12,6 +12,10 @@ app.use(express.static("public"));
 app.get("/", (req, res) => {
   res.sendFile("index.html", { root: __dirname });
 });
+
+app.get("/torrentdloader", (req, res) => {
+  res.sendFile("webtor.html", { root: __dirname });
+});
 app.get("/creepy", (req, res) => {
   let arr = JSON.parse(fs.readFileSync('./postList.json', 'utf8'));
   const baseHtml = fs.readFileSync("./creepy.html").toString();

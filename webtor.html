@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TorrentDLoader</title>
+    <script src="https://cdn.jsdelivr.net/npm/webtorrent@latest/webtorrent.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-900 text-white flex flex-col items-center justify-center min-h-screen p-6">
+
+    <div class="w-full max-w-lg bg-gray-800 p-6 rounded-lg shadow-md">
+        <h1 class="text-2xl font-bold mb-4 text-center">TorrentDLoader</h1>
+        
+        <input type="text" id="magnetLink" 
+            class="w-full p-3 text-black rounded-md border border-gray-600 focus:ring-2 focus:ring-blue-500" 
+            placeholder="Enter Magnet Link">
+        
+        <button onclick="downloadTorrent()" 
+            class="w-full mt-3 bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-md transition">
+            Download
+        </button>
+
+        <p id="status" class="mt-3 text-center text-gray-300"></p>
+
+        <div class="w-full bg-gray-700 rounded-full h-4 mt-3 overflow-hidden">
+            <div id="progressFill" class="h-full bg-green-500 text-center text-xs leading-4 text-white transition-all" style="width: 0%;">0%</div>
+        </div>
+
+        <div id="files" class="mt-4"></div>
+    </div>
+
+    <script>
+        const client = new WebTorrent();
+
+        function downloadTorrent() {
+            const magnetURI = document.getElementById("magnetLink").value.trim();
+            if (!magnetURI) {
+                alert("Please enter a magnet link.");
+                return;
+            }
+
+            // Reset UI
+            document.getElementById("status").innerText = "Connecting...";
+            document.getElementById("progressFill").style.width = "0%";
+            document.getElementById("progressFill").innerText = "0%";
+            document.getElementById("files").innerHTML = "";
+
+            try {
+                client.add(magnetURI, (torrent) => {
+                    document.getElementById("status").innerText = "Downloading: " + torrent.name;
+
+                    torrent.on("download", () => {
+                        let progress = (torrent.progress * 100).toFixed(2);
+                        document.getElementById("progressFill").style.width = progress + "%";
+                        document.getElementById("progressFill").innerText = progress + "%";
+                    });
+
+                    torrent.on("done", () => {
+                        document.getElementById("status").innerText = "Download Complete!";
+                        document.getElementById("progressFill").style.width = "100%";
+                        document.getElementById("progressFill").innerText = "100%";
+
+                        torrent.files.forEach(file => {
+                            file.getBlobURL((err, url) => {
+                                if (err) {
+                                    console.error("File Error:", err);
+                                    return;
+                                }
+                                const link = document.createElement("a");
+                                link.href = url;
+                                link.download = file.name;
+                                link.innerText = "Download " + file.name;
+                                link.className = "block mt-2 text-blue-400 hover:text-blue-500 underline";
+                                document.getElementById("files").appendChild(link);
+                            });
+                        });
+                    });
+
+                }).on("error", (err) => {
+                    document.getElementById("status").innerText = "Error: " + err.message;
+                    console.error("Torrent Error:", err);
+                });
+
+            } catch (error) {
+                document.getElementById("status").innerText = "Invalid Magnet Link.";
+                console.error("Error:", error);
+            }
+        }
+    </script>
+
+</body>
+</html>
