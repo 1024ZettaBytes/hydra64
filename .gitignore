@@ -86,3 +86,9 @@ typings/
 
 # DynamoDB Local files
 .dynamodb/
+
+# SQLite database
+data/
+*.db
+*.db-wal
+*.db-shm

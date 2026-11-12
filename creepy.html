@@ -20,9 +20,9 @@
 </div>
   </body>
   <script>
-    function markAsRead(index) {
-      fetch('/creepy/markRead/'+index).then(function (response) {
-        // The API call was successful!
+    function markAsRead(id) {
+      fetch('/creepy/' + id + '/read', { method: 'POST' }).then(function (response) {
+        if (!response.ok) throw new Error('HTTP ' + response.status);
         window.location.reload();
       }).catch(function (err) {
         // There was an error
